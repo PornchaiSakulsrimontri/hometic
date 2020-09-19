@@ -17,7 +17,7 @@ func main() {
 		w.Write([]byte(`{"status":"active"}`))
 	}).Methods(http.MethodPost)
 
-	addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("POR"))
+	addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
 	fmt.Println("addr:", addr)
 	server := http.Server{
 		Addr:    addr,
