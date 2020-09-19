@@ -10,10 +10,9 @@ import (
 
 type mockPairDevice struct{}
 
-func (mockPairDevice) Pair(p Pair) error  {
+func (mockPairDevice) Pair(p Pair) error {
 	return nil
 }
-
 
 func TestCreatePairDevice(t *testing.T) {
 	payload := new(bytes.Buffer)
@@ -21,7 +20,9 @@ func TestCreatePairDevice(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/pair-device", payload)
 	rec := httptest.NewRecorder()
 
-	handler := PairDeviceHandler(mockPairDevice{})
+	handler := PairDeviceHandler(CreatePairDeviceFunc(func(p Pair) error {
+		return nil
+	}))
 
 	handler.ServeHTTP(rec, req)
 
