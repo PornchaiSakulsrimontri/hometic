@@ -69,6 +69,6 @@ var createPairDevice = func(p Pair) error {
 		log.Fatal(err)
 	}
 
-	_, err = db.Exec("INSERT INTO pairs VALUES (?,?);", p.DeviceID, p.UserID)
+	_, err = db.Exec("INSERT INTO pairs VALUES ($1,$2)", p.DeviceID, p.UserID)
 	return err
 }
