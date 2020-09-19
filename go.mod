@@ -1,4 +1,4 @@
-module github.com/nheng/hometic
+module github.com/PornchaiSakulsrimontri/hometic
 
 go 1.14
 
