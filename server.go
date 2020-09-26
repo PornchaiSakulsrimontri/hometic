@@ -47,6 +47,7 @@ func PairDeviceHandler(device Device) http.HandlerFunc {
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			w.Header().Set("content-type", "application/json")
 			json.NewEncoder(w).Encode(err.Error())
 			return
 		}
@@ -56,10 +57,12 @@ func PairDeviceHandler(device Device) http.HandlerFunc {
 		err = device.Pair(p)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			w.Header().Set("content-type", "application/json")
 			json.NewEncoder(w).Encode(err.Error())
 			return
 		}
 
+		w.Header().Set("content-type", "application/json")
 		w.Write([]byte(`{"status":"active"}`))
 	}
 }

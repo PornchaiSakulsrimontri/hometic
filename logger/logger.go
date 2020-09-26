@@ -9,6 +9,10 @@ import (
 	"go.uber.org/zap"
 )
 
+type logkey string
+
+const key logkey = "logger"
+
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Do stuff here
@@ -16,7 +20,7 @@ func Middleware(next http.Handler) http.Handler {
 		l = l.With(zap.Namespace("hometic"))
 		l.Info(formatRequest(r))
 
-		c := context.WithValue(r.Context(), "logger", l)
+		c := context.WithValue(r.Context(), key, l)
 		newR := r.WithContext(c)
 
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
@@ -25,7 +29,7 @@ func Middleware(next http.Handler) http.Handler {
 }
 
 func L(ctx context.Context) *zap.Logger {
-	val := ctx.Value("logger")
+	val := ctx.Value(key)
 	if val == nil {
 		return zap.NewExample()
 	}
