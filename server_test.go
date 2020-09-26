@@ -9,6 +9,7 @@ import (
 )
 
 func TestCreatePairDevice(t *testing.T) {
+	//go test -v
 	payload := new(bytes.Buffer)
 	json.NewEncoder(payload).Encode(Pair{DeviceID: 1234, UserID: 4433})
 	req := httptest.NewRequest(http.MethodPost, "/pair-device", payload)
