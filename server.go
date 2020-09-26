@@ -7,10 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
+	"github.com/PornchaiSakulsrimontri/hometic/logger"
 	"github.com/gorilla/mux"
-	"go.uber.org/zap"
 
 	_ "github.com/lib/pq"
 )
@@ -19,8 +18,8 @@ func main() {
 	fmt.Println("hello hometic : I'm Gopher!!")
 
 	r := mux.NewRouter()
+	r.Use(logger.Middleware)
 	r.Handle("/pair-device", PairDeviceHandler(CreatePairDeviceFunc(createPairDevice))).Methods(http.MethodPost)
-	r.Use(loggingMiddleware)
 
 	addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
 	fmt.Println("addr:", addr)
@@ -34,44 +33,6 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Do stuff here
-		l := zap.NewExample()
-		l = l.With(zap.Namespace("hometic"))
-		l.Info(formatRequest(r))
-		// Call the next handler, which can be another middleware in the chain, or the final handler.
-		next.ServeHTTP(w, r)
-	})
-}
-
-// formatRequest generates ascii representation of a request
-func formatRequest(r *http.Request) string {
-	// Create return string
-	var request []string
-	// Add the request string
-	url := fmt.Sprintf("%v %v %v", r.Method, r.URL, r.Proto)
-	request = append(request, url)
-	// Add the host
-	request = append(request, fmt.Sprintf("Host: %v", r.Host))
-	// Loop through headers
-	for name, headers := range r.Header {
-		name = strings.ToLower(name)
-		for _, h := range headers {
-			request = append(request, fmt.Sprintf("%v: %v", name, h))
-		}
-	}
-
-	// If this is a POST, add post data
-	if r.Method == "POST" {
-		r.ParseForm()
-		request = append(request, "\n")
-		request = append(request, r.Form.Encode())
-	}
-	// Return the request as a string
-	return strings.Join(request, "\n")
-}
-
 type Pair struct {
 	DeviceID int64
 	UserID   int64
@@ -79,8 +40,7 @@ type Pair struct {
 
 func PairDeviceHandler(device Device) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		l := zap.NewExample()
-		l = l.With(zap.Namespace("hometic"), zap.String("I'm", "nheng"))
+		l := logger.L(r.Context())
 		l.Info("pair-device")
 
 		var p Pair
@@ -91,7 +51,7 @@ func PairDeviceHandler(device Device) http.HandlerFunc {
 			return
 		}
 		defer r.Body.Close()
-		fmt.Printf("pair: %#v\n", p)
+		l.Info(fmt.Sprintf("pair: %#v\n", p))
 
 		err = device.Pair(p)
 		if err != nil {
